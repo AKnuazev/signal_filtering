@@ -1,7 +1,7 @@
 from source.signal_filtering import Filter, function
 import matplotlib.pyplot as plt
 
-function_filter = Filter()
+my_filter = Filter(5)
+my_filter.filter()
+my_filter.visualize_filtering()
 
-plt.plot(function)
-plt.show()
