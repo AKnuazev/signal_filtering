@@ -14,7 +14,7 @@
 ![Clear signal](images/clear_signal.png)
 
 ### Сигнал после наложения шума:
-![User Interface](images/gui_screenshot.png)
+![Noise signal](images/signal_with_noise.png)
 
 ### Результаты фильтрации
 #### Размер окна 3
