@@ -78,28 +78,43 @@ def generate_weights(window_size):
 
 
 def print_table(lambdas, experiments, window_size):
+    print()
     print("Results of experiments for r=" + str(window_size) + ":")
-    print(" ______________________________________________________________________ ")
-    print("|  λ  |   J   | Distance |       Weights        | Noisiness | Difference |")
-    print("|-----|-------|----------|----------------------|-----------|------------|")
+    print(" _______________________________________________________________________________________ ")
+    print("|  λ  |    J   | Distance |              Weights               | Noisiness | Difference |")
+    print("|-----|--------|----------|------------------------------------|-----------|------------|")
     for i in range(len(lambdas)):
-        print("| " + str('{0:.4f}'.format(lambdas[i])) + " | " + str('{0:.4f}'.format(experiments[i][0])) + " | " + str(experiments[i][1]) + " | " + str(
-            '{0:.4f}'.format(experiments[i][2])) + " | " + str('{0:.4f}'.format(experiments[i][3])) + " |")
+        print("| ", end="")
+        print(lambdas[i], end=' | ')
+        print('{0:.4f}'.format(experiments[i][0]), end=' |  ')
+        print('{0:.4f}'.format(distance(experiments[i][2], experiments[i][3])), end='  | ')
+        for k in range(window_size):
+            print('{0:.4f}'.format(experiments[i][1][k]), end=' ')
+        print("| ", end="  ")
+        print('{0:.4f}'.format(experiments[i][2]), end="  |   ")
+        print('{0:.4f}'.format(experiments[i][3]), end="   |\n")
 
-    print("|_____|_______|__________|______________________|___________|____________|")
+    print("|_____|________|__________|____________________________________|___________|____________|")
     print()
     print()
 
     print("Best values:")
     best_index = experiments.index(min(experiments, key=lambda x: distance(x[2], x[3])))  # Compare by distance
-    print(" ________________________________________________________________________ ")
-    print("|  λ  |   J   | Distance |       Weights        | Noisiness | Difference |")
-    print("|-----|-------|----------|----------------------|-----------|------------|")
-    print("| " + str('{0:.4f}'.format(lambdas[best_index])) + " | " + str('{0:.4f}'.format(experiments[best_index][0])) + " | " + str(
-        experiments[best_index][1]) + " | " + str(
-        '{0:.4f}'.format(experiments[best_index][2])) + " | " + str('{0:.4f}'.format(experiments[best_index][3])) + " |")
+    print(" _______________________________________________________________________________________ ")
+    print("|  λ  |    J   | Distance |              Weights               | Noisiness | Difference |")
+    print("|-----|--------|----------|------------------------------------|-----------|------------|")
 
-    print("|_____|_______|__________|______________________|___________|____________|")
+    print("| ", end="")
+    print(lambdas[best_index], end=' | ')
+    print('{0:.4f}'.format(experiments[best_index][0]), end=' |  ')
+    print('{0:.4f}'.format(distance(experiments[best_index][2], experiments[best_index][3])), end='  | ')
+    for k in range(window_size):
+        print('{0:.4f}'.format(experiments[best_index][1][k]), end=' ')
+    print("| ", end="  ")
+    print('{0:.4f}'.format(experiments[best_index][2]), end="  |   ")
+    print('{0:.4f}'.format(experiments[best_index][3]), end="   |\n")
+
+    print("|_____|________|__________|____________________________________|___________|____________|")
 
 
 class Filter:
@@ -204,10 +219,6 @@ class Filter:
         return J_values_hist[min_index], weights_hist[min_index], noisiness_hist[min_index], difference_hist[min_index]
 
     def visualize_filtering(self):
-        # Take copy and reshape
-        for_graph_func_values = self.func_values.copy()
-        for_graph_noised_func_values = self.noised_func_values.copy()
-
         x = []
         for k in range(self.number_of_samples):
             x.append(self.x_min + k * (self.x_max - self.x_min) / self.number_of_samples)
@@ -216,26 +227,15 @@ class Filter:
         for k in range(self.M, self.number_of_samples - self.M):
             short_x.append(self.x_min + k * (self.x_max - self.x_min) / self.number_of_samples)
 
-        # # Formatting
-        # if self.window_size == 3:
-        #     del for_graph_func_values[0], for_graph_func_values[1], for_graph_func_values[2]
-        #     del for_graph_noised_func_values[0], for_graph_noised_func_values[1], for_graph_noised_func_values[2]
-
-        # # Initialize
-        # plt.plot(x, for_graph_func_values)
-        # plt.plot(x, for_graph_noised_func_values)
-        # plt.plot(x, self.filtered_func_values)
-
         plt.plot(x, self.func_values)
         plt.plot(x, self.noised_func_values)
-
         plt.plot(short_x, self.filtered_func_values)
 
         # Decoration
-        plt.title('Signals')
+        plt.title('Signal')
         plt.ylabel('f(x)')
         plt.xlabel('x')
-        plt.legend(['f(x) = sin(x) + 0.5', 'noise', 'filtering'], loc='lower center')
+        plt.legend(['f(x) = sin(x) + 0.5', 'noise', 'filtering with r=' + str(self.window_size)], loc='lower center')
 
         plt.show()
 
