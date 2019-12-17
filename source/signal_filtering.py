@@ -1,7 +1,8 @@
-from math import sin, pi, sqrt, pow, fabs, log, ceil,floor
+from math import sin, pi, sqrt, pow, fabs, log, ceil, floor
 from random import uniform
 import numpy as np
 import matplotlib.pyplot as plt
+
 
 # Task function, that simulates a signal
 def function(x):
@@ -76,6 +77,31 @@ def generate_weights(window_size):
         return weights
 
 
+def print_table(lambdas, experiments, window_size):
+    print("Results of experiments for r=" + str(window_size) + ":")
+    print(" ______________________________________________________________________ ")
+    print("|  λ  |   J   | Distance |       Weights        | Noisiness | Difference |")
+    print("|-----|-------|----------|----------------------|-----------|------------|")
+    for i in range(len(lambdas)):
+        print("| " + str('{0:.4f}'.format(lambdas[i])) + " | " + str('{0:.4f}'.format(experiments[i][0])) + " | " + str(experiments[i][1]) + " | " + str(
+            '{0:.4f}'.format(experiments[i][2])) + " | " + str('{0:.4f}'.format(experiments[i][3])) + " |")
+
+    print("|_____|_______|__________|______________________|___________|____________|")
+    print()
+    print()
+
+    print("Best values:")
+    best_index = experiments.index(min(experiments, key=lambda x: distance(x[2], x[3])))  # Compare by distance
+    print(" ________________________________________________________________________ ")
+    print("|  λ  |   J   | Distance |       Weights        | Noisiness | Difference |")
+    print("|-----|-------|----------|----------------------|-----------|------------|")
+    print("| " + str('{0:.4f}'.format(lambdas[best_index])) + " | " + str('{0:.4f}'.format(experiments[best_index][0])) + " | " + str(
+        experiments[best_index][1]) + " | " + str(
+        '{0:.4f}'.format(experiments[best_index][2])) + " | " + str('{0:.4f}'.format(experiments[best_index][3])) + " |")
+
+    print("|_____|_______|__________|______________________|___________|____________|")
+
+
 class Filter:
     def __init__(self, window_size):
         self.func_values = []
@@ -119,7 +145,7 @@ class Filter:
 
         # Filter signal
         window_elements = []  # Elements in current window sector
-        for i in range(self.M, len(self.noised_func_values) - 2 * self.M):
+        for i in range(self.M, len(self.noised_func_values) - self.M):
             for k in range(self.window_size):
                 window_elements.append(self.noised_func_values[i - self.M + k])
             self.filtered_func_values.append(mean_harmonic(window_elements, self.best_weights))
@@ -129,7 +155,7 @@ class Filter:
         curr_filtered_func_values = []  # New func values after
         window_elements = []  # Elements in current window sector
 
-        for i in range(self.M, len(self.noised_func_values) - 2 * self.M):
+        for i in range(self.M, len(self.noised_func_values) - self.M):
             for k in range(self.window_size):
                 window_elements.append(self.noised_func_values[i - self.M + k])
             curr_filtered_func_values.append(mean_harmonic(window_elements, weights))
@@ -147,8 +173,9 @@ class Filter:
         for curr_lambda in lambdas:
             experiments.append(self.find_best_J(curr_lambda))
 
-        best_index = experiments.index(min(experiments, key=lambda x: x[0]))  # Compare by J (first element)
+        best_index = experiments.index(min(experiments, key=lambda x: distance(x[2], x[3])))  # Compare by distance
 
+        print_table(lambdas, experiments, self.window_size)
         return lambdas[best_index], experiments[best_index]
 
     def find_best_J(self, curr_lambda):
@@ -177,29 +204,39 @@ class Filter:
         return J_values_hist[min_index], weights_hist[min_index], noisiness_hist[min_index], difference_hist[min_index]
 
     def visualize_filtering(self):
-        rng = np.arange(50)
-        rnd = np.random.randint(0, 10, size=(3, rng.size))
-        yrs = 1950 + rng
-
-
-
-        fig, ax = plt.subplots(figsize=(5, 3))
-
         # Take copy and reshape
         for_graph_func_values = self.func_values.copy()
         for_graph_noised_func_values = self.noised_func_values.copy()
 
-        # del for_graph_func_values[0], for_graph_func_values[1], for_graph_func_values[2]
-        # del for_graph_noised_func_values[0], for_graph_noised_func_values[1], for_graph_noised_func_values[2]
-        plt.plot(self.func_values)
-        plt.plot(self.noised_func_values)
-        plt.plot(self.filtered_func_values)
-        plt.show()
+        x = []
+        for k in range(self.number_of_samples):
+            x.append(self.x_min + k * (self.x_max - self.x_min) / self.number_of_samples)
 
-        ax.stackplot(for_graph_func_values, for_graph_noised_func_values, self.filtered_func_values, labels=['Eastasia', 'Eurasia', 'Oceania'])
-        ax.set_title('Combined debt growth over time')
-        ax.legend(loc='upper left')
-        ax.set_ylabel('Total debt')
-        fig.tight_layout()
+        short_x = []
+        for k in range(self.M, self.number_of_samples - self.M):
+            short_x.append(self.x_min + k * (self.x_max - self.x_min) / self.number_of_samples)
+
+        # # Formatting
+        # if self.window_size == 3:
+        #     del for_graph_func_values[0], for_graph_func_values[1], for_graph_func_values[2]
+        #     del for_graph_noised_func_values[0], for_graph_noised_func_values[1], for_graph_noised_func_values[2]
+
+        # # Initialize
+        # plt.plot(x, for_graph_func_values)
+        # plt.plot(x, for_graph_noised_func_values)
+        # plt.plot(x, self.filtered_func_values)
+
+        plt.plot(x, self.func_values)
+        plt.plot(x, self.noised_func_values)
+
+        plt.plot(short_x, self.filtered_func_values)
+
+        # Decoration
+        plt.title('Signals')
+        plt.ylabel('f(x)')
+        plt.xlabel('x')
+        plt.legend(['f(x) = sin(x) + 0.5', 'noise', 'filtering'], loc='lower center')
+
+        plt.show()
 
         plt.show()
