@@ -88,8 +88,16 @@ def print_table(lambdas, experiments, window_size):
         print(lambdas[i], end=' | ')
         print('{0:.4f}'.format(experiments[i][0]), end=' |  ')
         print('{0:.4f}'.format(distance(experiments[i][2], experiments[i][3])), end='  | ')
+
+        if window_size == 3:
+            print("      ", end='')
+
         for k in range(window_size):
-            print('{0:.4f}'.format(experiments[i][1][k]), end=' ')
+            print('{0:.4f}'.format(experiments[i][1][k]), end='  ')
+
+        if window_size == 3:
+            print("     ", end='')
+
         print("| ", end="  ")
         print('{0:.4f}'.format(experiments[i][2]), end="  |   ")
         print('{0:.4f}'.format(experiments[i][3]), end="   |\n")
@@ -108,13 +116,38 @@ def print_table(lambdas, experiments, window_size):
     print(lambdas[best_index], end=' | ')
     print('{0:.4f}'.format(experiments[best_index][0]), end=' |  ')
     print('{0:.4f}'.format(distance(experiments[best_index][2], experiments[best_index][3])), end='  | ')
+
+    if window_size == 3:
+        print("       ", end='')
     for k in range(window_size):
         print('{0:.4f}'.format(experiments[best_index][1][k]), end=' ')
+    if window_size == 3:
+        print("       ", end='')
+
     print("| ", end="  ")
     print('{0:.4f}'.format(experiments[best_index][2]), end="  |   ")
     print('{0:.4f}'.format(experiments[best_index][3]), end="   |\n")
 
     print("|_____|________|__________|____________________________________|___________|____________|")
+
+
+def print_J_points(experiments):
+    plt.scatter(0, 0)
+    for i in range(len(experiments)):
+        plt.scatter(experiments[i][2], experiments[i][3])
+
+    # Decoration
+    plt.title('J points')
+    plt.ylabel('difference')
+    plt.xlabel('noisiness')
+
+    legend = ["utopia point"]
+    for i in range(len(experiments)):
+        legend.append(str(i / 10))
+
+    plt.legend(legend, loc='upper left')
+
+    plt.show()
 
 
 class Filter:
@@ -191,6 +224,8 @@ class Filter:
         best_index = experiments.index(min(experiments, key=lambda x: distance(x[2], x[3])))  # Compare by distance
 
         print_table(lambdas, experiments, self.window_size)
+        print_J_points(experiments)
+
         return lambdas[best_index], experiments[best_index]
 
     def find_best_J(self, curr_lambda):
@@ -236,7 +271,5 @@ class Filter:
         plt.ylabel('f(x)')
         plt.xlabel('x')
         plt.legend(['f(x) = sin(x) + 0.5', 'noise', 'filtering with r=' + str(self.window_size)], loc='lower center')
-
-        plt.show()
 
         plt.show()

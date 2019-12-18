@@ -5,3 +5,6 @@ my_filter = Filter(3)
 my_filter.filter()
 my_filter.visualize_filtering()
 
+my_filter = Filter(5)
+my_filter.filter()
+my_filter.visualize_filtering()
