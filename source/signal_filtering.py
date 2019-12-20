@@ -90,13 +90,13 @@ def print_table(lambdas, experiments, window_size):
         print('{0:.4f}'.format(distance(experiments[i][2], experiments[i][3])), end='  | ')
 
         if window_size == 3:
-            print("      ", end='')
+            print("       ", end='')
 
         for k in range(window_size):
-            print('{0:.4f}'.format(experiments[i][1][k]), end='  ')
+            print('{0:.4f}'.format(experiments[i][1][k]), end=' ')
 
         if window_size == 3:
-            print("     ", end='')
+            print("       ", end='')
 
         print("| ", end="  ")
         print('{0:.4f}'.format(experiments[i][2]), end="  |   ")
